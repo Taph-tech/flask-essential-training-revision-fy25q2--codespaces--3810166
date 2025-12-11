@@ -8,6 +8,7 @@
     <form method="POST">
         {{ form.hidden_tag() }}
         {{ form.username.label }} {{ form.username(size=20) }}
+        {{form.email.label}} {{form.email.label(size=30)}}
         {{ form.submit() }}
       </form>
 </body>
