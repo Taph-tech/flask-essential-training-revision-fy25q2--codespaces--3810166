@@ -17,6 +17,10 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User {self.username}>'
+    
+@app.route('/')
+def index():
+    return redirect(url_for('users'))
 
 @app.route('/form', methods=['GET', 'POST'])
 def form():
@@ -39,11 +43,31 @@ def success():
     email = request.args.get('email')
     return render_template('success.html', username=username, email=email)
 
-@app.route('/users')
+@app.route('/users', methods =['GET', 'POST'])
 def users():
+    if request.method == 'POST':    #handle update requests
+        user_id = request.form.get('user_id')   #get the user ID from the form
+        new_email = request.form.get('new_email') #get the new email from the form
+        user_to_update = User.query.get(user_id)  #find the user by ID
+        if user_to_update:   #if user exists, update the email
+            user_to_update.email = new_email #update the email field
+            db.session.commit() #save changes to the database
+        return redirect(url_for('users'))
+     # Get request to display all users below   
     #retrieve all records from the User table in the db
     all_users = User.query.all()
     return render_template('users.html', users=all_users)
+
+@app.route('/delete_user/<int:id>', methods= ['POST'])
+def delete_user(id):
+      user = User.query.get(id)  #get the user ID from the form
+      if user:
+          db.session.delete(user) #delete the user from the database
+          db.session.commit()  #save changes to the database
+          return redirect(url_for('users')) #redirect to the users page
+      elif not user:  #if user does not exist
+          return "User not found", 404  #return 404 error if user not found
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
